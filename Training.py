@@ -302,13 +302,15 @@ def generate_images(model, test_input, tar, number=None):
         plt.axis('off')
     if number:
         plt.savefig("/Users/Amy/Documents/GitHub/AI-Queens/epoch{:03}.png".format(number))
-    
+    else:
+        plt.show()
+  
     plt.close()
 
 # for example_input, example_target in test_dataset.take(3):
 #     generate_images(generator, example_input, example_target)
 
-EPOCHS = 25
+EPOCHS = 200
 
 import datetime
 log_dir="logs/"
@@ -368,7 +370,7 @@ def fit(train_ds, epochs, test_ds, example_input, example_target):
     # New save method for h5 format:
     # Uncomment for training in Colab instances:
     h5_dir = '/Users/Amy/Documents/GitHub/AI-Queens/Pix2Pix Trained Models/'
-    h5_name = 'generator_model_002_house2plan_10epochs.h5'
+    h5_name = 'generator_model_002_200e.h5'
     generator.save(h5_dir+h5_name)
 
 example = test_dataset.take(1)
@@ -379,7 +381,7 @@ for example_input, example_target in example:
 fit(train_dataset, EPOCHS, test_dataset, eg_in, eg_tar)
 # Save the model:
 h5_dir = '/Users/Amy/Documents/GitHub/AI-Queens/Pix2Pix Trained Models/'
-h5_name = 'generator_model_002a_.h5'
+h5_name = 'generator_model_002a_200e.h5'
 generator.save(h5_dir+h5_name)
 
 # restoring the latest checkpoint in checkpoint_dir
