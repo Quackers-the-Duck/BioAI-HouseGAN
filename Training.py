@@ -33,11 +33,11 @@ def load(image_file):
 
 inp, re = load(PATH+'Test/0e1302cc01cc.png')
 # casting to int for matplotlib to show the image
-plt.figure()
-plt.imshow(inp/255.0)
-plt.figure()
-plt.imshow(re/255.0)
-plt.show()
+# plt.figure()
+# plt.imshow(inp/255.0)
+# plt.figure()
+# plt.imshow(re/255.0)
+# plt.show()
 
 def resize(input_image, real_image, height, width):
     input_image = tf.image.resize(input_image, [height, width],
@@ -77,14 +77,14 @@ def random_jitter(input_image, real_image):
 
     return input_image, real_image
 
-plt.figure(figsize=(6, 6))
-for i in range(4):
-  rj_inp, rj_re = random_jitter(inp, re)
-  plt.subplot(2, 2, i+1)
-  plt.imshow(rj_re/255.0)
-  plt.axis('off')
-  # print(rj_inp)
-plt.show()
+# plt.figure(figsize=(6, 6))
+# for i in range(4):
+#   rj_inp, rj_re = random_jitter(inp, re)
+#   plt.subplot(2, 2, i+1)
+#   plt.imshow(rj_re/255.0)
+#   plt.axis('off')
+#   # print(rj_inp)
+# plt.show()
 
 def load_image_train(image_file):
     input_image, real_image = load(image_file)
@@ -216,8 +216,8 @@ def Generator():
 generator = Generator()
 
 gen_output = generator(inp[tf.newaxis,...], training=False)
-plt.imshow(gen_output[0,...])
-plt.show()
+# plt.imshow(gen_output[0,...])
+# plt.show()
 
 LAMBDA = 100
 def generator_loss(disc_generated_output, gen_output, target):
@@ -262,9 +262,9 @@ discriminator = Discriminator()
 # tf.keras.utils.plot_model(discriminator, show_shapes=True, dpi=64)
 
 disc_out = discriminator([inp[tf.newaxis,...], gen_output], training=False)
-plt.imshow(disc_out[0,...,-1], vmin=-20, vmax=20, cmap='RdBu_r')
-plt.colorbar()
-plt.show()
+# plt.imshow(disc_out[0,...,-1], vmin=-20, vmax=20, cmap='RdBu_r')
+# plt.colorbar()
+# plt.show()
 
 loss_object = tf.keras.losses.BinaryCrossentropy(from_logits=True)
 
@@ -287,7 +287,7 @@ checkpoint = tf.train.Checkpoint(generator_optimizer=generator_optimizer,
                                  generator=generator,
                                  discriminator=discriminator)
 
-def generate_images(model, test_input, tar):
+def generate_images(model, test_input, tar, number=None):
     prediction = model(test_input, training=True)
     plt.figure(figsize=(15,15))
 
@@ -300,12 +300,15 @@ def generate_images(model, test_input, tar):
         # getting the pixel values between [0, 1] to plot it.
         plt.imshow(display_list[i] * 0.5 + 0.5)
         plt.axis('off')
-    plt.show()
+    if number:
+        plt.savefig("/Users/Amy/Documents/GitHub/AI-Queens/epoch{:03}.png".format(number))
+    
+    plt.close()
 
-for example_input, example_target in test_dataset.take(3):
-    generate_images(generator, example_input, example_target)
+# for example_input, example_target in test_dataset.take(3):
+#     generate_images(generator, example_input, example_target)
 
-EPOCHS = 200
+EPOCHS = 25
 
 import datetime
 log_dir="logs/"
@@ -340,13 +343,11 @@ def train_step(input_image, target, epoch):
         tf.summary.scalar('gen_l1_loss', gen_l1_loss, step=epoch)
         tf.summary.scalar('disc_loss', disc_loss, step=epoch)
 
-def fit(train_ds, epochs, test_ds):
+def fit(train_ds, epochs, test_ds, example_input, example_target):
     for epoch in range(epochs):
         start = time.time()
-
-        if epoch % 50 == 0
-            for example_input, example_target in test_ds.take(1):
-                generate_images(generator, example_input, example_target)
+        
+        generate_images(generator, example_input, example_target, number=epoch+1)
         print("Epoch: ", epoch)
 
         # Train
@@ -367,13 +368,18 @@ def fit(train_ds, epochs, test_ds):
     # New save method for h5 format:
     # Uncomment for training in Colab instances:
     h5_dir = '/Users/Amy/Documents/GitHub/AI-Queens/Pix2Pix Trained Models/'
-    h5_name = 'generator_model_001_house2plan_061720.h5'
+    h5_name = 'generator_model_002_house2plan_10epochs.h5'
     generator.save(h5_dir+h5_name)
 
-fit(train_dataset, EPOCHS, test_dataset)
+example = test_dataset.take(1)
+for example_input, example_target in example:
+    eg_in = example_input
+    eg_tar = example_target
+
+fit(train_dataset, EPOCHS, test_dataset, eg_in, eg_tar)
 # Save the model:
-generator.save('Users/Amy/Documents/GitHub/AI-Queens/generator_model_002_epochs_200.h5')
-h5_name = 'generator_model_003_061620.h5'
+h5_dir = '/Users/Amy/Documents/GitHub/AI-Queens/Pix2Pix Trained Models/'
+h5_name = 'generator_model_002a_.h5'
 generator.save(h5_dir+h5_name)
 
 # restoring the latest checkpoint in checkpoint_dir
